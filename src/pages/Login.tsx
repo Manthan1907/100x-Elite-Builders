@@ -4,6 +4,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Card,
   CardContent,
@@ -16,6 +17,7 @@ import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
 
 export default function Login() {
+  const [userType, setUserType] = useState<"candidate" | "sponsor">("candidate");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -35,7 +37,7 @@ export default function Login() {
     });
     
     setIsLoading(false);
-    navigate("/dashboard");
+    navigate(userType === "candidate" ? "/candidate-dashboard" : "/sponsor-dashboard");
   };
 
   return (
@@ -45,41 +47,84 @@ export default function Login() {
           <CardHeader className="space-y-1 text-center">
             <CardTitle className="text-2xl">Welcome back</CardTitle>
             <CardDescription>
-              Enter your email and password to sign in to your account
+              Sign in to your account
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
-                <Input 
-                  id="email" 
-                  type="email" 
-                  placeholder="m@example.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                />
-              </div>
-              <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <Label htmlFor="password">Password</Label>
-                  <Link to="/forgot-password" className="text-sm text-primary hover:underline">
-                    Forgot password?
-                  </Link>
-                </div>
-                <Input 
-                  id="password" 
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                />
-              </div>
-              <Button type="submit" className="w-full" disabled={isLoading}>
-                {isLoading ? "Signing In..." : "Sign In"}
-              </Button>
-            </form>
+            <Tabs defaultValue="candidate" onValueChange={(value) => setUserType(value as "candidate" | "sponsor")}>
+              <TabsList className="grid grid-cols-2 mb-4">
+                <TabsTrigger value="candidate">Candidate</TabsTrigger>
+                <TabsTrigger value="sponsor">Sponsor</TabsTrigger>
+              </TabsList>
+              
+              <TabsContent value="candidate">
+                <form onSubmit={handleSubmit} className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="email">Email</Label>
+                    <Input 
+                      id="email" 
+                      type="email" 
+                      placeholder="m@example.com"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      required
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <Label htmlFor="password">Password</Label>
+                      <Link to="/forgot-password" className="text-sm text-primary hover:underline">
+                        Forgot password?
+                      </Link>
+                    </div>
+                    <Input 
+                      id="password" 
+                      type="password"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      required
+                    />
+                  </div>
+                  <Button type="submit" className="w-full" disabled={isLoading}>
+                    {isLoading ? "Signing In..." : "Sign In as Candidate"}
+                  </Button>
+                </form>
+              </TabsContent>
+              
+              <TabsContent value="sponsor">
+                <form onSubmit={handleSubmit} className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="sponsor-email">Email</Label>
+                    <Input 
+                      id="sponsor-email" 
+                      type="email" 
+                      placeholder="contact@company.com"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      required
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <Label htmlFor="sponsor-password">Password</Label>
+                      <Link to="/forgot-password" className="text-sm text-primary hover:underline">
+                        Forgot password?
+                      </Link>
+                    </div>
+                    <Input 
+                      id="sponsor-password" 
+                      type="password"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      required
+                    />
+                  </div>
+                  <Button type="submit" className="w-full" disabled={isLoading}>
+                    {isLoading ? "Signing In..." : "Sign In as Sponsor"}
+                  </Button>
+                </form>
+              </TabsContent>
+            </Tabs>
 
             <div className="relative">
               <div className="absolute inset-0 flex items-center">

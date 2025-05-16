@@ -12,10 +12,12 @@ import Leaderboard from "./pages/Leaderboard";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import Onboarding from "./pages/Onboarding";
+import SponsorOnboarding from "./pages/SponsorOnboarding";
 import SubmissionForm from "./pages/SubmissionForm";
 import BuilderProfile from "./pages/BuilderProfile";
 import JudgePanel from "./pages/JudgePanel";
-import Dashboard from "./pages/Dashboard";
+import CandidateDashboard from "./pages/CandidateDashboard";
+import SponsorDashboard from "./pages/SponsorDashboard";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -40,7 +42,10 @@ const App = () => (
               <Route path="/login" element={<Login />} />
               <Route path="/signup" element={<Signup />} />
               <Route path="/onboarding" element={<Onboarding />} />
-              <Route path="/dashboard" element={<Dashboard />} />
+              <Route path="/sponsor-onboarding" element={<SponsorOnboarding />} />
+              <Route path="/candidate-dashboard" element={<CandidateDashboard />} />
+              <Route path="/sponsor-dashboard" element={<SponsorDashboard />} />
+              <Route path="/dashboard" element={<CandidateDashboard />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </main>
