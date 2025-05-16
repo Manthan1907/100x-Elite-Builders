@@ -4,7 +4,7 @@ import { cva, type VariantProps } from "class-variance-authority"
 
 import { cn } from "@/lib/utils"
 
-const badgeVariants = cva(
+export const badgeVariants = cva(
   "inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2",
   {
     variants: {
@@ -32,13 +32,19 @@ const badgeVariants = cva(
   }
 )
 
+export type BadgeVariant = NonNullable<VariantProps<typeof badgeVariants>["variant"]>
+
 export interface BadgeProps
   extends React.HTMLAttributes<HTMLDivElement>,
-    VariantProps<typeof badgeVariants> {}
+    VariantProps<typeof badgeVariants> {
+  variant?: BadgeVariant;
+}
 
-function Badge({ className, variant, ...props }: BadgeProps) {
+function Badge({ className, variant = "default", ...props }: BadgeProps) {
+  // Ensure variant is a valid option
+  const safeVariant = (variant as BadgeVariant) || "default";
   return (
-    <div className={cn(badgeVariants({ variant }), className)} {...props} />
+    <div className={cn(badgeVariants({ variant: safeVariant }), className)} {...props} />
   )
 }
 

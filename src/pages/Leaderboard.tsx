@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -11,17 +10,55 @@ import {
 } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
+import { Badge, BadgeVariant } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Award, Trophy, Star } from "lucide-react";
 
+// Define types for badge objects
+type BadgeInfo = {
+  name: string;
+  description: string;
+  variant: BadgeVariant;
+}
+
+// Define type for leader objects
+type Leader = {
+  id: number;
+  rank: number;
+  name: string;
+  username: string;
+  avatar: string;
+  score: number;
+  badges: BadgeInfo[];
+  wins: number;
+  participations: number;
+}
+
+// Define type for participant objects
+type Participant = {
+  id: number;
+  rank: number;
+  name: string;
+  username: string;
+  avatar: string;
+  score: number;
+  badges?: BadgeInfo[];
+}
+
+// Define type for challenge objects
+type Challenge = {
+  challengeId: number;
+  title: string;
+  participants: Participant[];
+}
+
 export default function Leaderboard() {
   const [timeframe, setTimeframe] = useState("all-time");
   const [searchQuery, setSearchQuery] = useState("");
 
-  const globalLeaders = [
+  const globalLeaders: Leader[] = [
     { 
       id: 1, 
       rank: 1, 
@@ -159,7 +196,7 @@ export default function Leaderboard() {
     },
   ];
 
-  const challengeLeaderboards = [
+  const challengeLeaderboards: Challenge[] = [
     {
       challengeId: 1,
       title: "LLM-powered Customer Support Bot",

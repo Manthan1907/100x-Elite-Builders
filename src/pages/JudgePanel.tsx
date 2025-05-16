@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
-import { Badge } from "@/components/ui/badge";
+import { Badge, BadgeVariant } from "@/components/ui/badge";
 import {
   Table,
   TableBody,
@@ -18,6 +18,13 @@ import {
 import { Slider } from "@/components/ui/slider";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
+
+// Define a type for badge objects to ensure they have valid variants
+type BadgeOption = {
+  id: string;
+  name: string;
+  variant: BadgeVariant;
+}
 
 export default function JudgePanel() {
   const { id } = useParams<{ id: string }>();
@@ -48,12 +55,12 @@ export default function JudgePanel() {
     ],
     repoUrl: "https://github.com/sarahchen/llm-support-bot",
     demoUrl: "https://youtu.be/abc123",
-    badges: []
+    badges: [] as BadgeOption[]
   });
 
   const [selectedBadges, setSelectedBadges] = useState<string[]>([]);
   
-  const availableBadges = [
+  const availableBadges: BadgeOption[] = [
     { id: "top10", name: "Top 10%", variant: "top" },
     { id: "winner", name: "Category Winner", variant: "winner" },
     { id: "sponsor", name: "Sponsor Favorite", variant: "sponsor" },
