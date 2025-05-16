@@ -14,6 +14,8 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { Award, Trophy, Star } from "lucide-react";
 
 export default function Leaderboard() {
   const [timeframe, setTimeframe] = useState("all-time");
@@ -27,7 +29,10 @@ export default function Leaderboard() {
       username: "schen", 
       avatar: "/placeholder.svg", 
       score: 9850, 
-      badges: ["Top Contributor", "NLP Specialist"],
+      badges: [
+        { name: "Top Contributor", description: "Awarded for consistent high-quality submissions", variant: "default" },
+        { name: "NLP Specialist", description: "Recognized expertise in Natural Language Processing", variant: "success" }
+      ],
       wins: 8,
       participations: 15
     },
@@ -38,7 +43,10 @@ export default function Leaderboard() {
       username: "mrodriguez", 
       avatar: "/placeholder.svg", 
       score: 9720, 
-      badges: ["Computer Vision Expert"],
+      badges: [
+        { name: "Computer Vision Expert", description: "Recognized expertise in Computer Vision models", variant: "success" },
+        { name: "Top 10%", description: "Ranked in the top 10% of all builders", variant: "top" }
+      ],
       wins: 7,
       participations: 12
     },
@@ -49,7 +57,11 @@ export default function Leaderboard() {
       username: "apatel", 
       avatar: "/placeholder.svg", 
       score: 9450, 
-      badges: ["Rising Star", "Multi-modal Master"],
+      badges: [
+        { name: "Rising Star", description: "New builder showing exceptional potential", variant: "default" },
+        { name: "Multi-modal Master", description: "Excellence in multi-modal AI systems", variant: "success" },
+        { name: "Sponsor Favorite", description: "Selected as a favorite by OpenAI", variant: "sponsor" }
+      ],
       wins: 6,
       participations: 10
     },
@@ -60,7 +72,10 @@ export default function Leaderboard() {
       username: "dkim", 
       avatar: "/placeholder.svg", 
       score: 9320, 
-      badges: ["Code Specialist"],
+      badges: [
+        { name: "Code Specialist", description: "Excellence in code-related tasks and systems", variant: "success" },
+        { name: "Category Winner", description: "Won first place in the Coding Challenge", variant: "winner" }
+      ],
       wins: 5,
       participations: 14
     },
@@ -71,7 +86,9 @@ export default function Leaderboard() {
       username: "ejohnson", 
       avatar: "/placeholder.svg", 
       score: 9180, 
-      badges: ["Data Science Pro"],
+      badges: [
+        { name: "Data Science Pro", description: "Expertise in data science and analytics", variant: "success" }
+      ],
       wins: 5,
       participations: 11
     },
@@ -82,7 +99,9 @@ export default function Leaderboard() {
       username: "jwilson", 
       avatar: "/placeholder.svg", 
       score: 8950, 
-      badges: ["LLM Expert"],
+      badges: [
+        { name: "LLM Expert", description: "Specialized knowledge in large language models", variant: "success" }
+      ],
       wins: 4,
       participations: 9
     },
@@ -93,7 +112,9 @@ export default function Leaderboard() {
       username: "smartinez", 
       avatar: "/placeholder.svg", 
       score: 8820, 
-      badges: ["3x Winner"],
+      badges: [
+        { name: "3x Winner", description: "Won 3 different challenge categories", variant: "winner" }
+      ],
       wins: 3,
       participations: 8
     },
@@ -104,7 +125,9 @@ export default function Leaderboard() {
       username: "ohassan", 
       avatar: "/placeholder.svg", 
       score: 8700, 
-      badges: ["Consistent Performer"],
+      badges: [
+        { name: "Consistent Performer", description: "Consistently scores in the top quartile", variant: "default" }
+      ],
       wins: 2,
       participations: 12
     },
@@ -115,7 +138,9 @@ export default function Leaderboard() {
       username: "lzhang", 
       avatar: "/placeholder.svg", 
       score: 8650, 
-      badges: ["NLP Specialist"],
+      badges: [
+        { name: "NLP Specialist", description: "Recognized expertise in Natural Language Processing", variant: "success" }
+      ],
       wins: 2,
       participations: 7
     },
@@ -126,7 +151,9 @@ export default function Leaderboard() {
       username: "athompson", 
       avatar: "/placeholder.svg", 
       score: 8540, 
-      badges: ["Computer Vision Expert"],
+      badges: [
+        { name: "Computer Vision Expert", description: "Specialized knowledge in computer vision systems", variant: "success" }
+      ],
       wins: 2,
       participations: 6
     },
@@ -137,21 +164,91 @@ export default function Leaderboard() {
       challengeId: 1,
       title: "LLM-powered Customer Support Bot",
       participants: [
-        { id: 1, rank: 1, name: "Sarah Chen", username: "schen", avatar: "/placeholder.svg", score: 95.8 },
-        { id: 2, rank: 2, name: "Alex Johnson", username: "ajohnson", avatar: "/placeholder.svg", score: 94.3 },
-        { id: 3, rank: 3, name: "Raj Patel", username: "rpatel", avatar: "/placeholder.svg", score: 93.1 }
+        { 
+          id: 1, 
+          rank: 1, 
+          name: "Sarah Chen", 
+          username: "schen", 
+          avatar: "/placeholder.svg", 
+          score: 95.8,
+          badges: [
+            { name: "Category Winner", description: "Won first place in the LLM Support Bot Challenge", variant: "winner" }
+          ]
+        },
+        { 
+          id: 2, 
+          rank: 2, 
+          name: "Alex Johnson", 
+          username: "ajohnson", 
+          avatar: "/placeholder.svg", 
+          score: 94.3,
+          badges: [
+            { name: "Top 10%", description: "Ranked in the top 10% for this challenge", variant: "top" }
+          ]
+        },
+        { 
+          id: 3, 
+          rank: 3, 
+          name: "Raj Patel", 
+          username: "rpatel", 
+          avatar: "/placeholder.svg", 
+          score: 93.1,
+          badges: [
+            { name: "Sponsor Favorite", description: "Selected as a favorite by the challenge sponsor", variant: "sponsor" }
+          ]
+        }
       ]
     },
     {
       challengeId: 2,
       title: "Real-time Image Generation API",
       participants: [
-        { id: 3, rank: 1, name: "Michael Rodriguez", username: "mrodriguez", avatar: "/placeholder.svg", score: 97.2 },
-        { id: 4, rank: 2, name: "Aisha Patel", username: "apatel", avatar: "/placeholder.svg", score: 96.5 },
-        { id: 5, rank: 3, name: "David Kim", username: "dkim", avatar: "/placeholder.svg", score: 94.8 }
+        { 
+          id: 3, 
+          rank: 1, 
+          name: "Michael Rodriguez", 
+          username: "mrodriguez", 
+          avatar: "/placeholder.svg", 
+          score: 97.2,
+          badges: [
+            { name: "Category Winner", description: "Won first place in the Image Generation API Challenge", variant: "winner" }
+          ]
+        },
+        { 
+          id: 4, 
+          rank: 2, 
+          name: "Aisha Patel", 
+          username: "apatel", 
+          avatar: "/placeholder.svg", 
+          score: 96.5,
+          badges: [
+            { name: "Top 10%", description: "Ranked in the top 10% for this challenge", variant: "top" }
+          ]
+        },
+        { 
+          id: 5, 
+          rank: 3, 
+          name: "David Kim", 
+          username: "dkim", 
+          avatar: "/placeholder.svg", 
+          score: 94.8,
+          badges: [
+            { name: "Sponsor Favorite", description: "Selected as a favorite by the challenge sponsor", variant: "sponsor" }
+          ]
+        }
       ]
     }
   ];
+
+  const getBadgeIcon = (badgeName: string) => {
+    if (badgeName.includes("Winner") || badgeName.includes("First")) {
+      return <Trophy className="h-3 w-3 mr-1" />;
+    } else if (badgeName.includes("Top")) {
+      return <Star className="h-3 w-3 mr-1" />;
+    } else {
+      return <Award className="h-3 w-3 mr-1" />;
+    }
+  };
 
   const filteredLeaders = globalLeaders.filter(leader => 
     leader.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
@@ -232,7 +329,19 @@ export default function Leaderboard() {
                           <div className="text-sm text-muted-foreground">@{leader.username}</div>
                           <div className="flex gap-1 mt-1 flex-wrap">
                             {leader.badges.map((badge, i) => (
-                              <Badge key={i} variant="outline" className="text-xs px-1 py-0">{badge}</Badge>
+                              <TooltipProvider key={i}>
+                                <Tooltip>
+                                  <TooltipTrigger asChild>
+                                    <Badge variant={badge.variant} className="inline-flex gap-1 cursor-help">
+                                      {getBadgeIcon(badge.name)}
+                                      {badge.name}
+                                    </Badge>
+                                  </TooltipTrigger>
+                                  <TooltipContent>
+                                    <p className="max-w-xs">{badge.description}</p>
+                                  </TooltipContent>
+                                </Tooltip>
+                              </TooltipProvider>
                             ))}
                           </div>
                         </div>
@@ -286,15 +395,34 @@ export default function Leaderboard() {
                         
                         <div className="col-span-6">
                           <div className="flex items-center gap-3">
-                            <Avatar className="h-8 w-8">
-                              <AvatarImage src={participant.avatar} alt={participant.name} />
-                              <AvatarFallback>{participant.name.charAt(0)}</AvatarFallback>
-                            </Avatar>
+                            <Link to={`/profile/${participant.username}`}>
+                              <Avatar className="h-8 w-8">
+                                <AvatarImage src={participant.avatar} alt={participant.name} />
+                                <AvatarFallback>{participant.name.charAt(0)}</AvatarFallback>
+                              </Avatar>
+                            </Link>
                             <div>
                               <Link to={`/profile/${participant.username}`} className="font-medium hover:text-primary">
                                 {participant.name}
                               </Link>
                               <div className="text-sm text-muted-foreground">@{participant.username}</div>
+                              <div className="flex gap-1 mt-1 flex-wrap">
+                                {participant.badges?.map((badge, i) => (
+                                  <TooltipProvider key={i}>
+                                    <Tooltip>
+                                      <TooltipTrigger asChild>
+                                        <Badge variant={badge.variant} className="inline-flex gap-1 cursor-help">
+                                          {getBadgeIcon(badge.name)}
+                                          {badge.name}
+                                        </Badge>
+                                      </TooltipTrigger>
+                                      <TooltipContent>
+                                        <p className="max-w-xs">{badge.description}</p>
+                                      </TooltipContent>
+                                    </Tooltip>
+                                  </TooltipProvider>
+                                ))}
+                              </div>
                             </div>
                           </div>
                         </div>

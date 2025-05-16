@@ -13,6 +13,8 @@ import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import Onboarding from "./pages/Onboarding";
 import SubmissionForm from "./pages/SubmissionForm";
+import BuilderProfile from "./pages/BuilderProfile";
+import JudgePanel from "./pages/JudgePanel";
 import Dashboard from "./pages/Dashboard";
 import NotFound from "./pages/NotFound";
 
@@ -33,6 +35,8 @@ const App = () => (
               <Route path="/challenge/:id" element={<ChallengeDetail />} />
               <Route path="/submit/:id?" element={<SubmissionForm />} />
               <Route path="/leaderboard" element={<Leaderboard />} />
+              <Route path="/profile/:username" element={<BuilderProfile />} />
+              <Route path="/admin/judge/:id" element={<JudgePanel />} />
               <Route path="/login" element={<Login />} />
               <Route path="/signup" element={<Signup />} />
               <Route path="/onboarding" element={<Onboarding />} />
