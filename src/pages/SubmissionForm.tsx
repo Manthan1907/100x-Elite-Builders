@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -80,18 +79,26 @@ export default function SubmissionForm() {
       <Breadcrumb className="mb-6">
         <BreadcrumbList>
           <BreadcrumbItem>
-            <BreadcrumbLink as={Link} to="/">Home</BreadcrumbLink>
+            <Link to="/">
+              <BreadcrumbLink>Home</BreadcrumbLink>
+            </Link>
           </BreadcrumbItem>
           <BreadcrumbSeparator />
           <BreadcrumbItem>
-            <BreadcrumbLink as={Link} to="/challenges">Challenges</BreadcrumbLink>
+            <Link to="/challenges">
+              <BreadcrumbLink>Challenges</BreadcrumbLink>
+            </Link>
           </BreadcrumbItem>
           <BreadcrumbSeparator />
           <BreadcrumbItem>
-            <BreadcrumbLink as={Link} to={`/challenge/${id}`}>Challenge {id}</BreadcrumbLink>
+            <Link to={`/challenge/${id}`}>
+              <BreadcrumbLink>Challenge {id}</BreadcrumbLink>
+            </Link>
           </BreadcrumbItem>
           <BreadcrumbSeparator />
-          <BreadcrumbItem>Submit</BreadcrumbItem>
+          <BreadcrumbItem>
+            <BreadcrumbLink>Submit</BreadcrumbLink>
+          </BreadcrumbItem>
         </BreadcrumbList>
       </Breadcrumb>
 
