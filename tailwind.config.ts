@@ -19,6 +19,10 @@ export default {
       }
     },
     extend: {
+      fontFamily: {
+        sans: ["Inter", "sans-serif"],
+        display: ["Cal Sans", "Inter", "sans-serif"],
+      },
       colors: {
         border: 'hsl(var(--border))',
         input: 'hsl(var(--input))',
@@ -32,6 +36,18 @@ export default {
         secondary: {
           DEFAULT: 'hsl(var(--secondary))',
           foreground: 'hsl(var(--secondary-foreground))'
+        },
+        coral: {
+          50: '#fff8f6',
+          100: '#fff0ed',
+          200: '#ffd8d0',
+          300: '#ffb4a3',
+          400: '#ff8a71',
+          500: '#ff5e3a', // Main coral color
+          600: '#ea4624',
+          700: '#c2301b',
+          800: '#9f291b',
+          900: '#82241c',
         },
         destructive: {
           DEFAULT: 'hsl(var(--destructive))',
