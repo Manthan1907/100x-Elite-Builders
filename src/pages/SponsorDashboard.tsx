@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import {
@@ -14,7 +13,7 @@ import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Bell, Calendar, LineChart, PlusCircle, Trophy } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { fetchSponsorChallenges, fetchChallengeSubmissions, Challenge, Submission } from "@/services/challengeService";
+import { fetchSponsorChallenges, fetchChallengeSubmissions, Challenge, Submission, approveSubmission } from "@/services/challengeService";
 import { useQuery } from "@tanstack/react-query";
 
 export default function SponsorDashboard() {
@@ -92,8 +91,8 @@ export default function SponsorDashboard() {
         <div className="lg:w-2/3 space-y-8">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
             <div>
-              <h1 className="text-3xl font-bold">Sponsor Dashboard</h1>
-              <p className="text-muted-foreground">Welcome back!</p>
+              <h1 className="text-3xl font-bold font-['Helvetica']">Sponsor Dashboard</h1>
+              <p className="text-muted-foreground font-['Decima_Mono']">Welcome back!</p>
             </div>
             <Button asChild>
               <Link to="/create-challenge">
@@ -104,7 +103,7 @@ export default function SponsorDashboard() {
           
           <Card>
             <CardHeader>
-              <CardTitle>Sponsorship Overview</CardTitle>
+              <CardTitle className="font-['Helvetica']">Sponsorship Overview</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -112,22 +111,22 @@ export default function SponsorDashboard() {
                   <div className="flex justify-center mb-2">
                     <Trophy className="h-6 w-6 text-blue-600" />
                   </div>
-                  <p className="text-muted-foreground text-sm">Challenges Sponsored</p>
-                  <p className="text-4xl font-bold">{challenges.length}</p>
+                  <p className="text-muted-foreground text-sm font-['Decima_Mono']">Challenges Sponsored</p>
+                  <p className="text-4xl font-bold font-['Decima_Mono']">{challenges.length}</p>
                 </div>
                 <div className="bg-muted/30 p-4 rounded-lg text-center">
                   <div className="flex justify-center mb-2">
                     <LineChart className="h-6 w-6 text-green-600" />
                   </div>
-                  <p className="text-muted-foreground text-sm">Total Participants</p>
-                  <p className="text-4xl font-bold">{totalParticipants}</p>
+                  <p className="text-muted-foreground text-sm font-['Decima_Mono']">Total Participants</p>
+                  <p className="text-4xl font-bold font-['Decima_Mono']">{totalParticipants}</p>
                 </div>
                 <div className="bg-muted/30 p-4 rounded-lg text-center">
                   <div className="flex justify-center mb-2">
                     <Calendar className="h-6 w-6 text-purple-600" />
                   </div>
-                  <p className="text-muted-foreground text-sm">Active Until</p>
-                  <p className="text-4xl font-bold">{daysUntilAccountExpiry}<span className="text-sm font-normal">days</span></p>
+                  <p className="text-muted-foreground text-sm font-['Decima_Mono']">Active Until</p>
+                  <p className="text-4xl font-bold font-['Decima_Mono']">{daysUntilAccountExpiry}<span className="text-sm font-normal font-['Decima_Mono']">days</span></p>
                 </div>
               </div>
             </CardContent>
@@ -135,7 +134,7 @@ export default function SponsorDashboard() {
           
           <Card>
             <CardHeader>
-              <CardTitle>Your Challenges</CardTitle>
+              <CardTitle className="font-['Helvetica']">Your Challenges</CardTitle>
             </CardHeader>
             <CardContent>
               {isLoadingChallenges ? (
@@ -148,6 +147,7 @@ export default function SponsorDashboard() {
                     <TabsTrigger value="active">Active ({activeChallenges.length})</TabsTrigger>
                     <TabsTrigger value="planned">Planned ({plannedChallenges.length})</TabsTrigger>
                     <TabsTrigger value="completed">Completed ({completedChallenges.length})</TabsTrigger>
+                    <TabsTrigger value="submissions">Submissions</TabsTrigger>
                   </TabsList>
                   <TabsContent value="active" className="space-y-4">
                     {activeChallenges.length > 0 ? (
@@ -186,6 +186,78 @@ export default function SponsorDashboard() {
                         </Button>
                       </div>
                     )}
+                    
+                    {/* Submissions for the Active Challenge */}
+                    {activeChallenge && ( // Only show submissions if a challenge is selected
+                      <div className="mt-8">
+                        <h3 className="text-2xl font-bold mb-4 font-['Helvetica']">Submissions for Selected Challenge</h3>
+                         {isLoadingSubmissions ? (
+                           <div className="flex justify-center py-8">
+                             <p>Loading submissions...</p>
+                           </div>
+                         ) : submissions.length === 0 ? (
+                           <div className="text-center py-8">
+                             <p className="text-muted-foreground">No submissions for this challenge yet.</p>
+                           </div>
+                         ) : (
+                           <div className="space-y-4">
+                            {submissions.map((submission) => (
+                               <Card key={submission.id} className="hover:bg-muted/30">
+                                 <CardContent className="p-4">
+                                   <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                                     <div>
+                                       <Link to={`/submission/${submission.id}`} className="font-medium hover:text-primary">
+                                         {submission.title || 'Submission'}
+                                       </Link>
+                                       <div className="text-sm text-muted-foreground">
+                                         Submitted by {submission.user_name || 'Unknown User'} on {new Date(submission.created_at).toLocaleDateString()}
+                                       </div>
+                                     </div>
+                                     <div className="flex items-center gap-2">
+                                       <Badge variant={
+                                         submission.status === "under-review" ? "outline" :
+                                         submission.status === "scored" ? "secondary" :
+                                         submission.status === "approved" ? "default" : "outline"
+                                       }>
+                                         {submission.status === "under-review" ? "Under Review" :
+                                          submission.status === "scored" ? "Scored" :
+                                          submission.status === "approved" ? "Approved" : submission.status}
+                                       </Badge>
+                                       {submission.status !== 'approved' && (
+                                          <Button
+                                           variant="outline"
+                                            size="sm"
+                                            onClick={async () => {
+                                              try {
+                                                await approveSubmission(submission.id);
+                                                toast({
+                                                  title: "Submission Approved",
+                                                  description: "The submission has been marked as approved.",
+                                                });
+                                                // TODO: Refetch submissions after approval
+                                              } catch (error) {
+                                                console.error("Error approving submission:", error);
+                                                toast({
+                                                  title: "Failed to Approve Submission",
+                                                  description: "There was an error approving the submission. Please try again.",
+                                                  variant: "destructive",
+                                                });
+                                              }
+                                            }}
+                                          >
+                                           Approve
+                                         </Button>
+                                       )}
+                                     </div>
+                                   </div>
+                                 </CardContent>
+                               </Card>
+                             ))
+                           }
+                          </div>
+                        )}
+                      </div>
+                     )}
                   </TabsContent>
                   <TabsContent value="planned" className="space-y-4">
                     {plannedChallenges.length > 0 ? (
@@ -256,7 +328,7 @@ export default function SponsorDashboard() {
           
           <Card>
             <CardHeader>
-              <CardTitle>Top Submissions</CardTitle>
+              <CardTitle className="font-['Helvetica']">Top Submissions</CardTitle>
             </CardHeader>
             <CardContent>
               {isLoadingSubmissions ? (
@@ -310,7 +382,7 @@ export default function SponsorDashboard() {
         <div className="lg:w-1/3 space-y-8">
           <Card>
             <CardHeader>
-              <CardTitle>Recent Activity</CardTitle>
+              <CardTitle className="font-['Helvetica']">Recent Activity</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               {challenges.length === 0 ? (
@@ -355,8 +427,8 @@ export default function SponsorDashboard() {
 
           <Card>
             <CardHeader>
-              <CardTitle>Sponsorship Status</CardTitle>
-              <CardDescription>Gold Tier Sponsor</CardDescription>
+              <CardTitle className="font-['Helvetica']">Sponsorship Status</CardTitle>
+              <CardDescription className="font-['Decima_Mono']">Gold Tier Sponsor</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="bg-yellow-100 dark:bg-yellow-900/30 p-4 rounded-lg mb-4">
@@ -376,10 +448,10 @@ export default function SponsorDashboard() {
           
           <Card>
             <CardHeader>
-              <CardTitle>Need Help?</CardTitle>
+              <CardTitle className="font-['Helvetica']">Need Help?</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <p className="text-sm text-muted-foreground">
+              <p className="text-sm text-muted-foreground font-['Decima_Mono']">
                 Our sponsor success team is here to help you create effective challenges and get the most out of your sponsorship.
               </p>
               <Button variant="outline" className="w-full">

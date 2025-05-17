@@ -1,0 +1,37 @@
+/* Helvetica Font Family */
+@font-face {
+  font-family: 'Helvetica';
+  src: local('Helvetica Neue'),
+       local('Helvetica'),
+       local('Arial');
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Helvetica';
+  src: local('Helvetica Neue Bold'),
+       local('Helvetica Bold'),
+       local('Arial Bold');
+  font-weight: bold;
+  font-style: normal;
+}
+
+/* Decima Mono Font Family */
+@font-face {
+  font-family: 'Decima Mono';
+  src: local('Decima Mono'),
+       local('Consolas'),
+       local('Courier New');
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Decima Mono';
+  src: local('Decima Mono Bold'),
+       local('Consolas Bold'),
+       local('Courier New Bold');
+  font-weight: bold;
+  font-style: normal;
+} 

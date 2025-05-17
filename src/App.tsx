@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -21,6 +20,8 @@ import CandidateDashboard from "./pages/CandidateDashboard";
 import SponsorDashboard from "./pages/SponsorDashboard";
 import CreateChallenge from "./pages/CreateChallenge"; 
 import NotFound from "./pages/NotFound";
+import ProtectedRoute from "./components/ProtectedRoute";
+import SubmissionSuccess from "./pages/SubmissionSuccess";
 
 const queryClient = new QueryClient();
 
@@ -45,10 +46,31 @@ const App = () => {
                 <Route path="/signup" element={<Signup />} />
                 <Route path="/onboarding" element={<Onboarding />} />
                 <Route path="/sponsor-onboarding" element={<SponsorOnboarding />} />
-                <Route path="/candidate-dashboard" element={<CandidateDashboard />} />
-                <Route path="/sponsor-dashboard" element={<SponsorDashboard />} />
-                <Route path="/create-challenge" element={<CreateChallenge />} />
-                <Route path="/dashboard" element={<CandidateDashboard />} />
+                <Route 
+                  path="/candidate-dashboard" 
+                  element={
+                    <ProtectedRoute allowedRole="candidate">
+                      <CandidateDashboard />
+                    </ProtectedRoute>
+                  } 
+                />
+                <Route 
+                  path="/sponsor-dashboard" 
+                  element={
+                    <ProtectedRoute allowedRole="sponsor">
+                      <SponsorDashboard />
+                    </ProtectedRoute>
+                  } 
+                />
+                <Route 
+                  path="/create-challenge" 
+                  element={
+                    <ProtectedRoute allowedRole="sponsor">
+                      <CreateChallenge />
+                    </ProtectedRoute>
+                  } 
+                />
+                <Route path="/submission-success" element={<SubmissionSuccess />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </main>

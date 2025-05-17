@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -51,12 +50,21 @@ export default function Login() {
 
       if (error) throw error;
 
+      // Get user role from metadata
+      const { data: { user } } = await supabase.auth.getUser();
+      const userRole = user?.user_metadata?.user_type;
+
+      if (!userRole) {
+        throw new Error("User role not found");
+      }
+
       toast({
         title: "Login successful",
         description: "Welcome back to AIBuilders!"
       });
       
-      navigate(userType === "candidate" ? "/candidate-dashboard" : "/sponsor-dashboard");
+      // Redirect based on user role
+      navigate(`/${userRole}-dashboard`);
     } catch (error: any) {
       toast({
         title: "Login failed",
@@ -74,7 +82,7 @@ export default function Login() {
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'github',
         options: {
-          redirectTo: `${window.location.origin}/candidate-dashboard`
+          redirectTo: `${window.location.origin}/onboarding`
         }
       });
       
@@ -95,7 +103,7 @@ export default function Login() {
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: `${window.location.origin}/candidate-dashboard`
+          redirectTo: `${window.location.origin}/onboarding`
         }
       });
       

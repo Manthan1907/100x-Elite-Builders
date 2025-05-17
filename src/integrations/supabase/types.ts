@@ -6,115 +6,114 @@ export type Json =
   | { [key: string]: Json | undefined }
   | Json[]
 
-export type Database = {
+export interface Database {
   public: {
     Tables: {
       challenges: {
         Row: {
-          category: string
-          created_at: string
-          deadline: string
-          description: string
-          difficulty: string
           id: string
-          prize_amount: number | null
-          prize_description: string | null
-          requirements: string | null
+          created_at: string
+          updated_at: string
+          title: string
+          description: string
+          requirements: string
+          prize_amount: string
+          prize_description: string
+          deadline: string
+          difficulty: string
+          category: string
+          status: string
           sponsor_id: string
           start_date: string
-          status: string
-          title: string
-          updated_at: string
         }
         Insert: {
-          category: string
-          created_at?: string
-          deadline: string
-          description: string
-          difficulty?: string
           id?: string
-          prize_amount?: number | null
-          prize_description?: string | null
-          requirements?: string | null
-          sponsor_id: string
-          start_date?: string
-          status?: string
-          title: string
+          created_at?: string
           updated_at?: string
+          title: string
+          description: string
+          requirements: string
+          prize_amount: string
+          prize_description: string
+          deadline: string
+          difficulty: string
+          category: string
+          status: string
+          sponsor_id?: string
+          start_date: string
         }
         Update: {
-          category?: string
-          created_at?: string
-          deadline?: string
-          description?: string
-          difficulty?: string
           id?: string
-          prize_amount?: number | null
-          prize_description?: string | null
-          requirements?: string | null
+          created_at?: string
+          updated_at?: string
+          title?: string
+          description?: string
+          requirements?: string
+          prize_amount?: string
+          prize_description?: string
+          deadline?: string
+          difficulty?: string
+          category?: string
+          status?: string
           sponsor_id?: string
           start_date?: string
-          status?: string
-          title?: string
-          updated_at?: string
         }
-        Relationships: []
       }
       submissions: {
         Row: {
-          challenge_id: string
-          created_at: string
-          demo_url: string | null
-          description: string
-          feedback: string | null
           id: string
-          repository_url: string | null
+          created_at: string
+          updated_at: string
+          challenge_id: string
+          user_id: string
+          repository_url: string
+          description: string
+          demo_url: string | null
+          additionalNotes: string | null
           score: number | null
           status: string
           submission_date: string
           title: string
-          updated_at: string
-          user_id: string
+          feedback: string | null
+          user_name: string | null
+          user_avatar: string | null
         }
         Insert: {
-          challenge_id: string
-          created_at?: string
-          demo_url?: string | null
-          description: string
-          feedback?: string | null
           id?: string
-          repository_url?: string | null
-          score?: number | null
-          status?: string
-          submission_date?: string
-          title: string
+          created_at?: string
           updated_at?: string
+          challenge_id: string
           user_id: string
-        }
-        Update: {
-          challenge_id?: string
-          created_at?: string
+          repository_url: string
+          description: string
           demo_url?: string | null
-          description?: string
-          feedback?: string | null
-          id?: string
-          repository_url?: string | null
+          additionalNotes?: string | null
           score?: number | null
           status?: string
           submission_date?: string
           title?: string
-          updated_at?: string
-          user_id?: string
+          feedback?: string | null
+          user_name?: string | null
+          user_avatar?: string | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "submissions_challenge_id_fkey"
-            columns: ["challenge_id"]
-            isOneToOne: false
-            referencedRelation: "challenges"
-            referencedColumns: ["id"]
-          },
-        ]
+        Update: {
+          id?: string
+          created_at?: string
+          updated_at?: string
+          challenge_id?: string
+          user_id?: string
+          repository_url?: string
+          description?: string
+          demo_url?: string | null
+          additionalNotes?: string | null
+          score?: number | null
+          status?: string
+          submission_date?: string
+          title?: string
+          feedback?: string | null
+          user_name?: string | null
+          user_avatar?: string | null
+        }
       }
     }
     Views: {
@@ -124,9 +123,6 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
-    }
-    CompositeTypes: {
       [_ in never]: never
     }
   }

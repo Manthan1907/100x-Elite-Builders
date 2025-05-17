@@ -1,4 +1,3 @@
-
 import { Link } from "react-router-dom";
 import {
   Card,
@@ -13,28 +12,34 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Bell } from "lucide-react";
+import { fetchUserSubmissions } from "@/services/challengeService";
+import { useState, useEffect } from "react";
 
 export default function CandidateDashboard() {
-  const userSubmissions = [
-    {
-      id: 1,
-      challengeTitle: "LLM-powered Customer Support Bot",
-      challengeId: 1,
-      submittedAt: "May 25, 2025",
-      status: "under-review",
-      score: null,
-      feedback: null,
-    },
-    {
-      id: 2,
-      challengeTitle: "Multimodal Learning System",
-      challengeId: 3,
-      submittedAt: "May 10, 2025",
-      status: "scored",
-      score: 87.5,
-      feedback: "Great implementation! The model handles text well but could improve on image processing.",
-    },
-  ];
+  const [userSubmissions, setUserSubmissions] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const loadUserSubmissions = async () => {
+      setIsLoading(true);
+      setError(null);
+      try {
+        const submissions = await fetchUserSubmissions();
+        setUserSubmissions(submissions);
+      } catch (err) {
+        console.error("Error fetching user submissions:", err);
+        setError("Failed to load your submissions.");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadUserSubmissions();
+  }, []);
+
+  // Calculate total won challenges
+  const totalWon = userSubmissions.filter(submission => submission.status === 'approved').length;
 
   const activeNotifications = [
     {
@@ -99,15 +104,15 @@ export default function CandidateDashboard() {
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div className="bg-muted/30 p-4 rounded-lg text-center">
                   <p className="text-muted-foreground text-sm">Participations</p>
-                  <p className="text-4xl font-bold">5</p>
+                  <p className="text-4xl font-bold">{userSubmissions.length}</p>
                 </div>
                 <div className="bg-muted/30 p-4 rounded-lg text-center">
-                  <p className="text-muted-foreground text-sm">Total Score</p>
-                  <p className="text-4xl font-bold">875</p>
+                  <p className="text-muted-foreground text-sm">Total Won</p>
+                  <p className="text-4xl font-bold">{totalWon}</p>
                 </div>
                 <div className="bg-muted/30 p-4 rounded-lg text-center">
                   <p className="text-muted-foreground text-sm">Global Rank</p>
-                  <p className="text-4xl font-bold">#42</p>
+                  <p className="text-4xl font-bold">Calculating...</p>
                 </div>
               </div>
             </CardContent>
@@ -125,35 +130,37 @@ export default function CandidateDashboard() {
                   <TabsTrigger value="all">All</TabsTrigger>
                 </TabsList>
                 <TabsContent value="active" className="space-y-4">
-                  {userSubmissions.map((submission) => (
-                    <Card key={submission.id} className="hover:bg-muted/30">
-                      <CardContent className="p-4">
-                        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-                          <div>
-                            <Link to={`/challenge/${submission.challengeId}`} className="font-medium hover:text-primary">
-                              {submission.challengeTitle}
-                            </Link>
-                            <div className="text-sm text-muted-foreground">Submitted on {submission.submittedAt}</div>
+                  {isLoading ? (
+                    <div className="text-center py-8">Loading your submissions...</div>
+                  ) : error ? (
+                    <div className="text-center text-red-500 py-8">{error}</div>
+                  ) : userSubmissions.length === 0 ? (
+                    <div className="text-center py-8">No submissions found.</div>
+                  ) : (
+                    userSubmissions.map((submission) => (
+                      <Card key={submission.id} className="hover:bg-muted/30">
+                        <CardContent className="p-4">
+                          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                            <div>
+                              <Link to={`/challenge/${submission.challenge_id}`} className="font-medium hover:text-primary">
+                                {submission.challenges?.title || 'Unknown Challenge'}
+                              </Link>
+                              <div className="text-sm text-muted-foreground">Submitted on {new Date(submission.created_at).toLocaleDateString()}</div>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <Badge variant={
+                                submission.status === "under-review" ? "outline" :
+                                submission.status === "scored" ? "secondary" : "default"
+                              }>
+                                {submission.status === "under-review" ? "Under Review" :
+                                 submission.status === "scored" ? "Scored" : submission.status}
+                              </Badge>
+                            </div>
                           </div>
-                          <div className="flex items-center gap-2">
-                            <Badge variant={
-                              submission.status === "under-review" ? "outline" :
-                              submission.status === "scored" ? "secondary" : "default"
-                            }>
-                              {submission.status === "under-review" ? "Under Review" :
-                              submission.status === "scored" ? "Scored" : submission.status}
-                            </Badge>
-                            {submission.score && (
-                              <span className="font-mono font-medium">{submission.score.toFixed(1)}</span>
-                            )}
-                            <Button variant="outline" size="sm" asChild>
-                              <Link to={`/submission/${submission.id}`}>View</Link>
-                            </Button>
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))}
+                        </CardContent>
+                      </Card>
+                    ))
+                  )}
                 </TabsContent>
                 <TabsContent value="completed" className="text-center py-12 text-muted-foreground">
                   No completed submissions yet.
@@ -228,40 +235,6 @@ export default function CandidateDashboard() {
                   </CardFooter>
                 </Card>
               ))}
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>Your Achievements</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="flex flex-wrap gap-2">
-                <div className="flex flex-col items-center p-2">
-                  <div className="h-14 w-14 rounded-full bg-primary/20 flex items-center justify-center mb-1">
-                    🏆
-                  </div>
-                  <p className="text-xs">First Win</p>
-                </div>
-                <div className="flex flex-col items-center p-2">
-                  <div className="h-14 w-14 rounded-full bg-primary/20 flex items-center justify-center mb-1">
-                    🧠
-                  </div>
-                  <p className="text-xs">NLP Pro</p>
-                </div>
-                <div className="flex flex-col items-center p-2">
-                  <div className="h-14 w-14 rounded-full bg-muted flex items-center justify-center mb-1 opacity-30">
-                    🔄
-                  </div>
-                  <p className="text-xs text-muted-foreground">Locked</p>
-                </div>
-                <div className="flex flex-col items-center p-2">
-                  <div className="h-14 w-14 rounded-full bg-muted flex items-center justify-center mb-1 opacity-30">
-                    🚀
-                  </div>
-                  <p className="text-xs text-muted-foreground">Locked</p>
-                </div>
-              </div>
             </CardContent>
           </Card>
         </div>

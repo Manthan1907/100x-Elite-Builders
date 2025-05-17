@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -22,6 +21,7 @@ import {
 } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { Badge } from "@/components/ui/badge";
+import { supabase } from "@/integrations/supabase/client";
 
 export default function Onboarding() {
   const [step, setStep] = useState(1);
@@ -46,7 +46,7 @@ export default function Onboarding() {
   const handleComplete = async () => {
     setIsCompleting(true);
     
-    // Mock API call
+    // Mock API call (replace with actual profile update later)
     await new Promise(resolve => setTimeout(resolve, 1500));
     
     toast({
@@ -55,7 +55,26 @@ export default function Onboarding() {
     });
     
     setIsCompleting(false);
-    navigate("/dashboard");
+
+    // Fetch user role and redirect to appropriate dashboard
+    const { data: { user }, error } = await supabase.auth.getUser();
+    if (error) {
+      console.error("Error fetching user role:", error);
+      // Redirect to a default page or show an error
+      navigate("/"); // Redirect to home or a generic error page
+      return;
+    }
+
+    const userRole = user?.user_metadata?.user_type;
+    if (userRole === "candidate") {
+      navigate("/candidate-dashboard");
+    } else if (userRole === "sponsor") {
+      navigate("/sponsor-dashboard");
+    } else {
+      // Handle cases where user role is missing or unexpected
+      console.error("User role not found or invalid:", userRole);
+      navigate("/"); // Redirect to home or a generic error page
+    }
   };
 
   const recommendedChallenges = [

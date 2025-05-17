@@ -29,6 +29,7 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import { useToast } from "@/hooks/use-toast";
+import { createSubmission } from "@/services/challengeService";
 
 export default function SubmissionForm() {
   const { id } = useParams<{ id: string }>();
@@ -37,9 +38,9 @@ export default function SubmissionForm() {
   const [currentStep, setCurrentStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({
-    repoUrl: "",
+    repository_url: "",
     description: "",
-    videoUrl: "",
+    demo_url: "",
     additionalNotes: ""
   });
 
@@ -52,18 +53,36 @@ export default function SubmissionForm() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!id) return;
+    
     setIsSubmitting(true);
-    
-    // Mock API call
-    await new Promise(resolve => setTimeout(resolve, 1500));
-    
-    toast({
-      title: "Submission successful!",
-      description: "Your solution has been submitted and is now being reviewed.",
-    });
-    
-    setIsSubmitting(false);
-    navigate("/submission-success");
+    try {
+      const submissionData = {
+        challenge_id: id,
+        repository_url: formData.repository_url,
+        description: formData.description,
+        demo_url: formData.demo_url || null,
+        additionalNotes: formData.additionalNotes || null
+      };
+
+      await createSubmission(submissionData);
+      
+      toast({
+        title: "Submission successful!",
+        description: "Your solution has been submitted and is now being reviewed.",
+      });
+      
+      navigate("/submission-success");
+    } catch (error: any) {
+      console.error("Error during createSubmission call:", error);
+      toast({
+        title: "Error submitting solution",
+        description: "Please try again later.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const nextStep = () => {
@@ -145,12 +164,12 @@ export default function SubmissionForm() {
             </CardHeader>
             <CardContent className="space-y-6">
               <div className="space-y-2">
-                <Label htmlFor="repoUrl">GitHub Repository URL *</Label>
+                <Label htmlFor="repository_url">GitHub Repository URL *</Label>
                 <Input 
-                  id="repoUrl" 
+                  id="repository_url" 
                   placeholder="https://github.com/username/repository"
-                  value={formData.repoUrl}
-                  onChange={(e) => handleChange("repoUrl", e.target.value)}
+                  value={formData.repository_url}
+                  onChange={(e) => handleChange("repository_url", e.target.value)}
                   required
                 />
                 <p className="text-sm text-muted-foreground">
@@ -189,12 +208,12 @@ export default function SubmissionForm() {
             </CardHeader>
             <CardContent className="space-y-6">
               <div className="space-y-2">
-                <Label htmlFor="videoUrl">Demo Video URL</Label>
+                <Label htmlFor="demo_url">Demo Video URL</Label>
                 <Input 
-                  id="videoUrl" 
+                  id="demo_url" 
                   placeholder="https://www.youtube.com/watch?v=..."
-                  value={formData.videoUrl}
-                  onChange={(e) => handleChange("videoUrl", e.target.value)}
+                  value={formData.demo_url}
+                  onChange={(e) => handleChange("demo_url", e.target.value)}
                 />
                 <p className="text-sm text-muted-foreground">
                   Link to a demo video showcasing your solution (YouTube, Vimeo, etc.)
@@ -234,16 +253,16 @@ export default function SubmissionForm() {
               <div className="rounded-lg border p-4 space-y-4">
                 <div>
                   <h4 className="font-medium">Repository URL</h4>
-                  <p className="text-sm">{formData.repoUrl}</p>
+                  <p className="text-sm">{formData.repository_url}</p>
                 </div>
                 <div>
                   <h4 className="font-medium">Solution Description</h4>
                   <p className="text-sm whitespace-pre-line">{formData.description}</p>
                 </div>
-                {formData.videoUrl && (
+                {formData.demo_url && (
                   <div>
                     <h4 className="font-medium">Demo Video</h4>
-                    <p className="text-sm">{formData.videoUrl}</p>
+                    <p className="text-sm">{formData.demo_url}</p>
                   </div>
                 )}
                 {formData.additionalNotes && (

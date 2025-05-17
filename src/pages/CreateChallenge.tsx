@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
@@ -29,6 +28,7 @@ type FormValues = {
   deadline: string;
   difficulty: string;
   category: string;
+  start_date: string;
 };
 
 export default function CreateChallenge() {
@@ -46,14 +46,18 @@ export default function CreateChallenge() {
       deadline: "",
       difficulty: "medium",
       category: "",
+      start_date: new Date().toISOString().slice(0, 10),
     }
   });
 
-  const onSubmit = async (data: FormValues) => {
+  const onSubmit = async (data: FormValues & { start_date: string }) => {
     setIsSubmitting(true);
     
     try {
-      // Convert form values to challenge object
+      const startDate = new Date(data.start_date);
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const status = startDate > today ? "draft" : "active";
       const challengeData: Omit<Challenge, "id" | "created_at" | "updated_at" | "sponsor_id"> = {
         title: data.title,
         description: data.description,
@@ -61,10 +65,10 @@ export default function CreateChallenge() {
         prize_amount: data.prize_amount ? parseFloat(data.prize_amount) : null,
         prize_description: data.prize_description,
         deadline: new Date(data.deadline).toISOString(),
-        start_date: new Date().toISOString(),
+        start_date: startDate.toISOString(),
         difficulty: data.difficulty,
         category: data.category,
-        status: "draft" // Default to draft status
+        status,
       };
       
       const challenge = await createChallenge(challengeData);
@@ -74,8 +78,8 @@ export default function CreateChallenge() {
         description: "Your challenge has been created successfully.",
       });
       
-      // Redirect to challenge management page
-      navigate(`/challenge/${challenge.id}/manage`);
+      // Redirect to sponsor dashboard
+      navigate("/sponsor-dashboard");
     } catch (error) {
       console.error("Error creating challenge:", error);
       toast({
@@ -293,6 +297,24 @@ export default function CreateChallenge() {
                     )}
                   />
                 </div>
+                
+                <FormField
+                  control={form.control}
+                  name="start_date"
+                  rules={{ required: "Start date is required" }}
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Start Date</FormLabel>
+                      <FormControl>
+                        <Input type="date" {...field} />
+                      </FormControl>
+                      <FormDescription>
+                        The date when the challenge goes live. If in the future, it will be planned/draft until then.
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
                 
                 <FormField
                   control={form.control}

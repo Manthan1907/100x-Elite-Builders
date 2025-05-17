@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -38,12 +37,14 @@ export default function Signup() {
     const checkSession = async () => {
       const { data } = await supabase.auth.getSession();
       if (data.session) {
-        navigate(userType === "candidate" ? "/candidate-dashboard" : "/sponsor-dashboard");
+        // Redirect to dashboard if already logged in
+        const userRole = data.session.user.user_metadata.user_type; // Assuming user_type is in metadata
+        navigate(userRole === "candidate" ? "/candidate-dashboard" : "/sponsor-dashboard");
       }
     };
     
     checkSession();
-  }, [navigate, userType]);
+  }, [navigate]); // Dependency array should only include navigate if userType change shouldn't trigger redirect
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -77,7 +78,11 @@ export default function Signup() {
         email,
         password,
         options: {
-          data: metadata,
+          data: {
+            ...metadata,
+            name: name,
+            avatar_url: null,
+          },
         }
       });
 
@@ -88,6 +93,7 @@ export default function Signup() {
         description: `Welcome to AIBuilders! Your ${userType} account has been created.`
       });
       
+      // Redirect to appropriate onboarding based on user type
       navigate(userType === "candidate" ? "/onboarding" : "/sponsor-onboarding");
     } catch (error: any) {
       toast({
@@ -106,7 +112,10 @@ export default function Signup() {
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'github',
         options: {
-          redirectTo: `${window.location.origin}/onboarding`
+          redirectTo: `${window.location.origin}/onboarding`,
+          queryParams: {
+            user_type: userType
+          }
         }
       });
       

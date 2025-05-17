@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
@@ -56,8 +55,8 @@ export default function LandingPage() {
         <div className="container mx-auto relative z-10 flex flex-col md:flex-row items-center gap-8 md:gap-16 pt-10 pb-20">
           <div className="flex-1 space-y-6">
             <div className="animate-fade-in">
-              <h1 className="text-4xl md:text-6xl font-display font-bold tracking-tight">
-                Become a <span className="text-white">100x Engineer</span>
+              <h1 className="text-4xl md:text-6xl font-['Helvetica'] font-bold tracking-tight">
+                <span className="text-white">100x Elite Builders</span>
               </h1>
               <p className="mt-6 text-xl text-white/90">
                 Join the platform where AI builders showcase their skills, compete in sponsored challenges, and get discovered by top companies.
@@ -68,7 +67,7 @@ export default function LandingPage() {
               <Button size="lg" className="bg-white text-coral-500 hover:bg-white/90" asChild>
                 <Link to="/challenges">Explore Challenges <ArrowRight className="ml-2 h-4 w-4" /></Link>
               </Button>
-              <Button size="lg" variant="outline" className="border-white text-white hover:bg-white/10" asChild>
+              <Button size="lg" variant="outline" className="border-coral-500 text-coral-500 hover:bg-coral-50" asChild>
                 <Link to="/signup">Join the Community</Link>
               </Button>
             </div>
@@ -95,7 +94,7 @@ export default function LandingPage() {
       <section className="py-20 px-4 md:px-6 bg-white">
         <div className="container mx-auto">
           <div className="text-center mb-12">
-            <h2 className="text-3xl font-display font-bold">What is 100x Engineers?</h2>
+            <h2 className="text-3xl font-['Helvetica'] font-bold">What is 100x Elite Builders?</h2>
             <div className="w-20 h-1 bg-coral-500 mx-auto mt-4 mb-6"></div>
             <p className="text-gray-600 max-w-2xl mx-auto">
               A global community of AI engineers building and competing in challenges
@@ -170,7 +169,7 @@ export default function LandingPage() {
       <section className="py-16 px-4 md:px-6 bg-white">
         <div className="container mx-auto">
           <div className="text-center mb-12">
-            <h2 className="text-3xl font-display font-bold">Why Join 100x Engineers?</h2>
+            <h2 className="text-3xl font-['Helvetica'] font-bold">Why Join 100x Elite Builders?</h2>
             <div className="w-20 h-1 bg-coral-500 mx-auto mt-4 mb-6"></div>
           </div>
           
