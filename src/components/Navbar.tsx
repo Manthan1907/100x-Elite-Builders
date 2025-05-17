@@ -1,6 +1,6 @@
 
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
@@ -14,6 +14,15 @@ import {
 
 export default function Navbar() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const navigate = useNavigate();
+  
+  const handleLogin = () => {
+    navigate('/login');
+  };
+  
+  const handleSignup = () => {
+    navigate('/signup');
+  };
   
   return (
     <nav className="w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -71,10 +80,10 @@ export default function Navbar() {
             </DropdownMenu>
           ) : (
             <div className="flex items-center gap-2">
-              <Button onClick={() => setIsLoggedIn(true)} variant="ghost">
+              <Button onClick={handleLogin} variant="ghost">
                 Login
               </Button>
-              <Button onClick={() => setIsLoggedIn(true)}>
+              <Button onClick={handleSignup}>
                 Sign Up
               </Button>
             </div>
