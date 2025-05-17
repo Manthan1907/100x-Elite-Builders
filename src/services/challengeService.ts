@@ -20,9 +20,15 @@ export const fetchSponsorChallenges = async () => {
 };
 
 export const createChallenge = async (challenge: Omit<Challenge, "id" | "created_at" | "updated_at" | "sponsor_id">) => {
+  const { data: session } = await supabase.auth.getSession();
+  
+  if (!session.session?.user?.id) {
+    throw new Error("User not authenticated");
+  }
+  
   const { data, error } = await supabase
     .from("challenges")
-    .insert([{ ...challenge }])
+    .insert([{ ...challenge, sponsor_id: session.session.user.id }])
     .select()
     .single();
 

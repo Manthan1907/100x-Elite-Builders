@@ -24,39 +24,41 @@ import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
 
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
+const App = () => {
+  return (
+    <QueryClientProvider client={queryClient}>
       <BrowserRouter>
-        <div className="flex flex-col min-h-screen">
-          <Navbar />
-          <main className="flex-1">
-            <Routes>
-              <Route path="/" element={<LandingPage />} />
-              <Route path="/challenges" element={<Challenges />} />
-              <Route path="/challenge/:id" element={<ChallengeDetail />} />
-              <Route path="/submit/:id?" element={<SubmissionForm />} />
-              <Route path="/leaderboard" element={<Leaderboard />} />
-              <Route path="/sponsors" element={<Sponsors />} />
-              <Route path="/profile/:username" element={<BuilderProfile />} />
-              <Route path="/admin/judge/:id" element={<JudgePanel />} />
-              <Route path="/login" element={<Login />} />
-              <Route path="/signup" element={<Signup />} />
-              <Route path="/onboarding" element={<Onboarding />} />
-              <Route path="/sponsor-onboarding" element={<SponsorOnboarding />} />
-              <Route path="/candidate-dashboard" element={<CandidateDashboard />} />
-              <Route path="/sponsor-dashboard" element={<SponsorDashboard />} />
-              <Route path="/create-challenge" element={<CreateChallenge />} />
-              <Route path="/dashboard" element={<CandidateDashboard />} />
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </main>
-        </div>
+        <TooltipProvider>
+          <div className="flex flex-col min-h-screen">
+            <Navbar />
+            <main className="flex-1">
+              <Routes>
+                <Route path="/" element={<LandingPage />} />
+                <Route path="/challenges" element={<Challenges />} />
+                <Route path="/challenge/:id" element={<ChallengeDetail />} />
+                <Route path="/submit/:id?" element={<SubmissionForm />} />
+                <Route path="/leaderboard" element={<Leaderboard />} />
+                <Route path="/sponsors" element={<Sponsors />} />
+                <Route path="/profile/:username" element={<BuilderProfile />} />
+                <Route path="/admin/judge/:id" element={<JudgePanel />} />
+                <Route path="/login" element={<Login />} />
+                <Route path="/signup" element={<Signup />} />
+                <Route path="/onboarding" element={<Onboarding />} />
+                <Route path="/sponsor-onboarding" element={<SponsorOnboarding />} />
+                <Route path="/candidate-dashboard" element={<CandidateDashboard />} />
+                <Route path="/sponsor-dashboard" element={<SponsorDashboard />} />
+                <Route path="/create-challenge" element={<CreateChallenge />} />
+                <Route path="/dashboard" element={<CandidateDashboard />} />
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </main>
+          </div>
+          <Toaster />
+          <Sonner />
+        </TooltipProvider>
       </BrowserRouter>
-    </TooltipProvider>
-  </QueryClientProvider>
-);
+    </QueryClientProvider>
+  );
+};
 
 export default App;
