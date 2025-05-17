@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -11,17 +11,51 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 export default function Navbar() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [userEmail, setUserEmail] = useState<string | null>(null);
   const navigate = useNavigate();
+  const { toast } = useToast();
   
-  const handleLogin = () => {
-    navigate('/login');
-  };
+  useEffect(() => {
+    // Check initial session
+    const checkSession = async () => {
+      const { data } = await supabase.auth.getSession();
+      setIsLoggedIn(!!data.session);
+      setUserEmail(data.session?.user.email || null);
+    };
+    
+    checkSession();
+    
+    // Subscribe to auth changes
+    const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
+      setIsLoggedIn(!!session);
+      setUserEmail(session?.user.email || null);
+    });
+    
+    return () => {
+      authListener.subscription.unsubscribe();
+    };
+  }, []);
   
-  const handleSignup = () => {
-    navigate('/signup');
+  const handleLogout = async () => {
+    try {
+      await supabase.auth.signOut();
+      toast({
+        title: "Logged out successfully",
+        description: "You have been logged out of your account"
+      });
+      navigate('/');
+    } catch (error) {
+      toast({
+        title: "Error logging out",
+        description: "Please try again",
+        variant: "destructive"
+      });
+    }
   };
   
   return (
@@ -52,7 +86,7 @@ export default function Navbar() {
                 <Button variant="ghost" className="relative h-8 w-8 rounded-full">
                   <Avatar className="h-8 w-8">
                     <AvatarImage src="/placeholder.svg" alt="@user" />
-                    <AvatarFallback>U</AvatarFallback>
+                    <AvatarFallback>{userEmail ? userEmail[0].toUpperCase() : 'U'}</AvatarFallback>
                   </Avatar>
                 </Button>
               </DropdownMenuTrigger>
@@ -61,7 +95,7 @@ export default function Navbar() {
                   <div className="flex flex-col space-y-1">
                     <p className="text-sm font-medium leading-none">User</p>
                     <p className="text-xs leading-none text-muted-foreground">
-                      user@example.com
+                      {userEmail || 'user@example.com'}
                     </p>
                   </div>
                 </DropdownMenuLabel>
@@ -73,17 +107,17 @@ export default function Navbar() {
                   <Link to="/dashboard" className="w-full">Dashboard</Link>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={() => setIsLoggedIn(false)}>
+                <DropdownMenuItem onClick={handleLogout}>
                   Log out
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           ) : (
             <div className="flex items-center gap-2">
-              <Button onClick={handleLogin} variant="ghost">
+              <Button onClick={() => navigate('/login')} variant="ghost">
                 Login
               </Button>
-              <Button onClick={handleSignup}>
+              <Button onClick={() => navigate('/signup')}>
                 Sign Up
               </Button>
             </div>

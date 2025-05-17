@@ -1,6 +1,6 @@
 
-import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -16,32 +16,130 @@ import {
 } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
+import { Mail, Lock, User } from "lucide-react";
 
 export default function Signup() {
-  const [userType, setUserType] = useState<"candidate" | "sponsor">("candidate");
+  const [searchParams] = useSearchParams();
+  const defaultTab = searchParams.get('type') === 'sponsor' ? 'sponsor' : 'candidate';
+  const [userType, setUserType] = useState<"candidate" | "sponsor">(defaultTab as "candidate" | "sponsor");
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [companyName, setCompanyName] = useState("");
   const [githubUsername, setGithubUsername] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [acceptTerms, setAcceptTerms] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
 
+  // Check if user is already logged in
+  useEffect(() => {
+    const checkSession = async () => {
+      const { data } = await supabase.auth.getSession();
+      if (data.session) {
+        navigate(userType === "candidate" ? "/candidate-dashboard" : "/sponsor-dashboard");
+      }
+    };
+    
+    checkSession();
+  }, [navigate, userType]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (!acceptTerms) {
+      toast({
+        title: "Terms agreement required",
+        description: "You must agree to the terms and conditions",
+        variant: "destructive"
+      });
+      return;
+    }
+    
     setIsLoading(true);
     
-    // Mock registration
-    await new Promise(resolve => setTimeout(resolve, 1500));
-    
-    toast({
-      title: "Account created",
-      description: `Welcome to AIBuilders! Your ${userType} account has been created.`
-    });
-    
-    setIsLoading(false);
-    navigate(userType === "candidate" ? "/onboarding" : "/sponsor-onboarding");
+    try {
+      // Additional metadata based on user type
+      const metadata = userType === "candidate" 
+        ? { 
+            name,
+            github_username: githubUsername,
+            user_type: userType 
+          } 
+        : { 
+            name,
+            company_name: companyName,
+            user_type: userType 
+          };
+
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: metadata,
+        }
+      });
+
+      if (error) throw error;
+
+      toast({
+        title: "Account created",
+        description: `Welcome to AIBuilders! Your ${userType} account has been created.`
+      });
+      
+      navigate(userType === "candidate" ? "/onboarding" : "/sponsor-onboarding");
+    } catch (error: any) {
+      toast({
+        title: "Registration failed",
+        description: error.message || "There was an error creating your account",
+        variant: "destructive"
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleGithubSignup = async () => {
+    setIsLoading(true);
+    try {
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'github',
+        options: {
+          redirectTo: `${window.location.origin}/onboarding`
+        }
+      });
+      
+      if (error) throw error;
+    } catch (error: any) {
+      toast({
+        title: "GitHub signup failed",
+        description: error.message,
+        variant: "destructive"
+      });
+      setIsLoading(false);
+    }
+  };
+
+  const handleGoogleSignup = async () => {
+    setIsLoading(true);
+    try {
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: `${window.location.origin}/onboarding`
+        }
+      });
+      
+      if (error) throw error;
+    } catch (error: any) {
+      toast({
+        title: "Google signup failed",
+        description: error.message,
+        variant: "destructive"
+      });
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -55,7 +153,7 @@ export default function Signup() {
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <Tabs defaultValue="candidate" onValueChange={(value) => setUserType(value as "candidate" | "sponsor")}>
+            <Tabs defaultValue={userType} onValueChange={(value) => setUserType(value as "candidate" | "sponsor")}>
               <TabsList className="grid grid-cols-2 mb-4">
                 <TabsTrigger value="candidate">Candidate</TabsTrigger>
                 <TabsTrigger value="sponsor">Sponsor</TabsTrigger>
@@ -65,36 +163,48 @@ export default function Signup() {
                 <form onSubmit={handleSubmit} className="space-y-4">
                   <div className="space-y-2">
                     <Label htmlFor="name">Full Name</Label>
-                    <Input 
-                      id="name" 
-                      placeholder="John Doe"
-                      value={name}
-                      onChange={(e) => setName(e.target.value)}
-                      required
-                    />
+                    <div className="relative">
+                      <User className="absolute left-3 top-2.5 h-5 w-5 text-muted-foreground" />
+                      <Input 
+                        id="name" 
+                        placeholder="John Doe"
+                        value={name}
+                        onChange={(e) => setName(e.target.value)}
+                        className="pl-10"
+                        required
+                      />
+                    </div>
                   </div>
                   
                   <div className="space-y-2">
                     <Label htmlFor="email">Email</Label>
-                    <Input 
-                      id="email" 
-                      type="email" 
-                      placeholder="m@example.com"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      required
-                    />
+                    <div className="relative">
+                      <Mail className="absolute left-3 top-2.5 h-5 w-5 text-muted-foreground" />
+                      <Input 
+                        id="email" 
+                        type="email" 
+                        placeholder="m@example.com"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        className="pl-10"
+                        required
+                      />
+                    </div>
                   </div>
                   
                   <div className="space-y-2">
                     <Label htmlFor="password">Password</Label>
-                    <Input 
-                      id="password" 
-                      type="password"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      required
-                    />
+                    <div className="relative">
+                      <Lock className="absolute left-3 top-2.5 h-5 w-5 text-muted-foreground" />
+                      <Input 
+                        id="password" 
+                        type="password"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        className="pl-10"
+                        required
+                      />
+                    </div>
                     <p className="text-xs text-muted-foreground">
                       Must be at least 8 characters and include a number and symbol
                     </p>
@@ -111,7 +221,11 @@ export default function Signup() {
                   </div>
                   
                   <div className="flex items-center space-x-2">
-                    <Checkbox id="terms" required />
+                    <Checkbox 
+                      id="terms" 
+                      checked={acceptTerms}
+                      onCheckedChange={(checked) => setAcceptTerms(checked === true)}
+                    />
                     <label
                       htmlFor="terms"
                       className="text-sm leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
@@ -143,46 +257,62 @@ export default function Signup() {
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="name">Contact Person</Label>
-                    <Input 
-                      id="name" 
-                      placeholder="Jane Doe"
-                      value={name}
-                      onChange={(e) => setName(e.target.value)}
-                      required
-                    />
+                    <Label htmlFor="sponsor-name">Contact Person</Label>
+                    <div className="relative">
+                      <User className="absolute left-3 top-2.5 h-5 w-5 text-muted-foreground" />
+                      <Input 
+                        id="sponsor-name" 
+                        placeholder="Jane Doe"
+                        value={name}
+                        onChange={(e) => setName(e.target.value)}
+                        className="pl-10"
+                        required
+                      />
+                    </div>
                   </div>
                   
                   <div className="space-y-2">
-                    <Label htmlFor="email">Email</Label>
-                    <Input 
-                      id="email" 
-                      type="email" 
-                      placeholder="j.doe@example.com"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      required
-                    />
+                    <Label htmlFor="sponsor-email">Email</Label>
+                    <div className="relative">
+                      <Mail className="absolute left-3 top-2.5 h-5 w-5 text-muted-foreground" />
+                      <Input 
+                        id="sponsor-email" 
+                        type="email" 
+                        placeholder="j.doe@example.com"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        className="pl-10"
+                        required
+                      />
+                    </div>
                   </div>
                   
                   <div className="space-y-2">
-                    <Label htmlFor="password">Password</Label>
-                    <Input 
-                      id="password" 
-                      type="password"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      required
-                    />
+                    <Label htmlFor="sponsor-password">Password</Label>
+                    <div className="relative">
+                      <Lock className="absolute left-3 top-2.5 h-5 w-5 text-muted-foreground" />
+                      <Input 
+                        id="sponsor-password" 
+                        type="password"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        className="pl-10"
+                        required
+                      />
+                    </div>
                     <p className="text-xs text-muted-foreground">
                       Must be at least 8 characters and include a number and symbol
                     </p>
                   </div>
                   
                   <div className="flex items-center space-x-2">
-                    <Checkbox id="terms" required />
+                    <Checkbox 
+                      id="sponsor-terms" 
+                      checked={acceptTerms}
+                      onCheckedChange={(checked) => setAcceptTerms(checked === true)}
+                    />
                     <label
-                      htmlFor="terms"
+                      htmlFor="sponsor-terms"
                       className="text-sm leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
                     >
                       I agree to the{" "}
@@ -211,10 +341,20 @@ export default function Signup() {
             </div>
 
             <div className="grid grid-cols-2 gap-4">
-              <Button variant="outline" type="button" disabled={isLoading}>
+              <Button 
+                variant="outline" 
+                type="button" 
+                disabled={isLoading}
+                onClick={handleGithubSignup}
+              >
                 GitHub
               </Button>
-              <Button variant="outline" type="button" disabled={isLoading}>
+              <Button 
+                variant="outline" 
+                type="button" 
+                disabled={isLoading}
+                onClick={handleGoogleSignup}
+              >
                 Google
               </Button>
             </div>
