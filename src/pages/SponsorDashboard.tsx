@@ -1,4 +1,5 @@
 
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import {
   Card,
@@ -12,74 +13,78 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Bell, Calendar, LineChart, PlusCircle, Trophy } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+import { fetchSponsorChallenges, fetchChallengeSubmissions, Challenge, Submission } from "@/services/challengeService";
+import { useQuery } from "@tanstack/react-query";
 
 export default function SponsorDashboard() {
-  const sponsoredChallenges = [
-    {
-      id: 1,
-      title: "Multimodal Learning System",
-      status: "active",
-      participants: 48,
-      deadline: "May 30, 2025",
-      submissions: 15,
-    },
-    {
-      id: 2,
-      title: "Reinforcement Learning Agent",
-      status: "planned",
-      participants: 0,
-      deadline: "June 15, 2025",
-      submissions: 0,
+  const { toast } = useToast();
+  const [activeChallenge, setActiveChallenge] = useState<string | null>(null);
+  
+  // Fetch sponsor's challenges
+  const { 
+    data: challenges = [], 
+    isLoading: isLoadingChallenges,
+    error: challengesError
+  } = useQuery({
+    queryKey: ['sponsorChallenges'],
+    queryFn: fetchSponsorChallenges,
+  });
+
+  // Fetch submissions for the active challenge if one is selected
+  const { 
+    data: submissions = [],
+    isLoading: isLoadingSubmissions
+  } = useQuery({
+    queryKey: ['challengeSubmissions', activeChallenge],
+    queryFn: () => activeChallenge ? fetchChallengeSubmissions(activeChallenge) : Promise.resolve([]),
+    enabled: !!activeChallenge,
+  });
+
+  useEffect(() => {
+    // If challenges are loaded and there's at least one, set the first one as active
+    if (challenges.length > 0 && !activeChallenge) {
+      setActiveChallenge(challenges[0].id);
     }
-  ];
+  }, [challenges, activeChallenge]);
 
-  const topSubmissions = [
-    {
-      id: 1,
-      challengeId: 1,
-      title: "Neural Multimodal Processor",
-      candidateName: "Alex Johnson",
-      candidateId: 1,
-      score: 94.5,
-    },
-    {
-      id: 2,
-      challengeId: 1,
-      title: "AudioVision ML System",
-      candidateName: "Taylor Smith",
-      candidateId: 2,
-      score: 91.2,
-    },
-    {
-      id: 3,
-      challengeId: 1,
-      title: "Integrated Perception Network",
-      candidateName: "Jordan Lee",
-      candidateId: 3,
-      score: 88.7,
-    },
-  ];
+  useEffect(() => {
+    if (challengesError) {
+      toast({
+        title: "Error loading challenges",
+        description: "Please try again later.",
+        variant: "destructive",
+      });
+    }
+  }, [challengesError, toast]);
 
-  const recentEvents = [
-    {
-      id: 1,
-      type: "submission",
-      message: "New submission for Multimodal Learning System",
-      date: "1 hour ago",
-    },
-    {
-      id: 2,
-      type: "score",
-      message: "Challenge review completed",
-      date: "1 day ago",
-    },
-    {
-      id: 3,
-      type: "deadline",
-      message: "Multimodal Learning System deadline approaching in 5 days",
-      date: "2 days ago",
-    },
-  ];
+  // Helper function to format dates
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return new Intl.DateTimeFormat('en-US', { year: 'numeric', month: 'short', day: 'numeric' }).format(date);
+  };
+
+  // Helper function to calculate days left until deadline
+  const calculateDaysLeft = (deadline: string) => {
+    const today = new Date();
+    const deadlineDate = new Date(deadline);
+    const diffTime = deadlineDate.getTime() - today.getTime();
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    
+    if (diffDays < 0) return "Expired";
+    if (diffDays === 0) return "Today";
+    if (diffDays === 1) return "1 day left";
+    return `${diffDays} days left`;
+  };
+
+  // Filter challenges by status
+  const activeChallenges = challenges.filter(c => c.status === 'active');
+  const plannedChallenges = challenges.filter(c => c.status === 'draft');
+  const completedChallenges = challenges.filter(c => c.status === 'completed');
+
+  // Calculate stats
+  const totalParticipants = submissions.length;
+  const daysUntilAccountExpiry = 120; // This would come from your subscription service
 
   return (
     <div className="container py-8">
@@ -88,7 +93,7 @@ export default function SponsorDashboard() {
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
             <div>
               <h1 className="text-3xl font-bold">Sponsor Dashboard</h1>
-              <p className="text-muted-foreground">Welcome back, Acme Corporation!</p>
+              <p className="text-muted-foreground">Welcome back!</p>
             </div>
             <Button asChild>
               <Link to="/create-challenge">
@@ -108,21 +113,21 @@ export default function SponsorDashboard() {
                     <Trophy className="h-6 w-6 text-blue-600" />
                   </div>
                   <p className="text-muted-foreground text-sm">Challenges Sponsored</p>
-                  <p className="text-4xl font-bold">2</p>
+                  <p className="text-4xl font-bold">{challenges.length}</p>
                 </div>
                 <div className="bg-muted/30 p-4 rounded-lg text-center">
                   <div className="flex justify-center mb-2">
                     <LineChart className="h-6 w-6 text-green-600" />
                   </div>
                   <p className="text-muted-foreground text-sm">Total Participants</p>
-                  <p className="text-4xl font-bold">48</p>
+                  <p className="text-4xl font-bold">{totalParticipants}</p>
                 </div>
                 <div className="bg-muted/30 p-4 rounded-lg text-center">
                   <div className="flex justify-center mb-2">
                     <Calendar className="h-6 w-6 text-purple-600" />
                   </div>
                   <p className="text-muted-foreground text-sm">Active Until</p>
-                  <p className="text-4xl font-bold">120<span className="text-sm font-normal">days</span></p>
+                  <p className="text-4xl font-bold">{daysUntilAccountExpiry}<span className="text-sm font-normal">days</span></p>
                 </div>
               </div>
             </CardContent>
@@ -133,68 +138,119 @@ export default function SponsorDashboard() {
               <CardTitle>Your Challenges</CardTitle>
             </CardHeader>
             <CardContent>
-              <Tabs defaultValue="active">
-                <TabsList className="mb-4">
-                  <TabsTrigger value="active">Active</TabsTrigger>
-                  <TabsTrigger value="planned">Planned</TabsTrigger>
-                  <TabsTrigger value="completed">Completed</TabsTrigger>
-                </TabsList>
-                <TabsContent value="active" className="space-y-4">
-                  {sponsoredChallenges
-                    .filter(challenge => challenge.status === "active")
-                    .map((challenge) => (
-                    <Card key={challenge.id} className="hover:bg-muted/30">
-                      <CardContent className="p-4">
-                        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-                          <div>
-                            <Link to={`/challenge/${challenge.id}`} className="font-medium hover:text-primary">
-                              {challenge.title}
-                            </Link>
-                            <div className="text-sm text-muted-foreground">Deadline: {challenge.deadline}</div>
-                          </div>
-                          <div className="flex items-center gap-4">
-                            <div className="text-right">
-                              <div className="text-sm font-medium">{challenge.participants} Participants</div>
-                              <div className="text-sm text-muted-foreground">{challenge.submissions} Submissions</div>
+              {isLoadingChallenges ? (
+                <div className="flex justify-center py-8">
+                  <p>Loading challenges...</p>
+                </div>
+              ) : (
+                <Tabs defaultValue="active">
+                  <TabsList className="mb-4">
+                    <TabsTrigger value="active">Active ({activeChallenges.length})</TabsTrigger>
+                    <TabsTrigger value="planned">Planned ({plannedChallenges.length})</TabsTrigger>
+                    <TabsTrigger value="completed">Completed ({completedChallenges.length})</TabsTrigger>
+                  </TabsList>
+                  <TabsContent value="active" className="space-y-4">
+                    {activeChallenges.length > 0 ? (
+                      activeChallenges.map((challenge) => (
+                        <Card key={challenge.id} className="hover:bg-muted/30">
+                          <CardContent className="p-4">
+                            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                              <div>
+                                <Link to={`/challenge/${challenge.id}`} className="font-medium hover:text-primary">
+                                  {challenge.title}
+                                </Link>
+                                <div className="text-sm text-muted-foreground">
+                                  Deadline: {formatDate(challenge.deadline)}
+                                  <span className="ml-2 font-medium text-orange-500">{calculateDaysLeft(challenge.deadline)}</span>
+                                </div>
+                              </div>
+                              <div className="flex items-center gap-4">
+                                <div className="text-right">
+                                  <div className="text-sm text-muted-foreground">Category</div>
+                                  <div className="text-sm font-medium">{challenge.category}</div>
+                                </div>
+                                <Badge variant="sponsor">Active</Badge>
+                                <Button variant="outline" size="sm" asChild>
+                                  <Link to={`/challenge/${challenge.id}/manage`}>Manage</Link>
+                                </Button>
+                              </div>
                             </div>
-                            <Badge variant="sponsor">Active</Badge>
-                            <Button variant="outline" size="sm" asChild>
-                              <Link to={`/challenge/${challenge.id}/manage`}>Manage</Link>
-                            </Button>
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </TabsContent>
-                <TabsContent value="planned" className="space-y-4">
-                  {sponsoredChallenges
-                    .filter(challenge => challenge.status === "planned")
-                    .map((challenge) => (
-                    <Card key={challenge.id} className="hover:bg-muted/30">
-                      <CardContent className="p-4">
-                        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-                          <div>
-                            <Link to={`/challenge/${challenge.id}`} className="font-medium hover:text-primary">
-                              {challenge.title}
-                            </Link>
-                            <div className="text-sm text-muted-foreground">Planned launch: {challenge.deadline}</div>
-                          </div>
-                          <div className="flex items-center gap-4">
-                            <Badge variant="outline">Planned</Badge>
-                            <Button variant="outline" size="sm" asChild>
-                              <Link to={`/challenge/${challenge.id}/edit`}>Edit</Link>
-                            </Button>
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </TabsContent>
-                <TabsContent value="completed" className="text-center py-12 text-muted-foreground">
-                  No completed challenges yet.
-                </TabsContent>
-              </Tabs>
+                          </CardContent>
+                        </Card>
+                      ))
+                    ) : (
+                      <div className="text-center py-8">
+                        <p className="text-muted-foreground">No active challenges. Create one to get started!</p>
+                        <Button variant="link" asChild className="mt-2">
+                          <Link to="/create-challenge">Create Challenge</Link>
+                        </Button>
+                      </div>
+                    )}
+                  </TabsContent>
+                  <TabsContent value="planned" className="space-y-4">
+                    {plannedChallenges.length > 0 ? (
+                      plannedChallenges.map((challenge) => (
+                        <Card key={challenge.id} className="hover:bg-muted/30">
+                          <CardContent className="p-4">
+                            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                              <div>
+                                <Link to={`/challenge/${challenge.id}`} className="font-medium hover:text-primary">
+                                  {challenge.title}
+                                </Link>
+                                <div className="text-sm text-muted-foreground">
+                                  Planned launch: {formatDate(challenge.start_date)}
+                                </div>
+                              </div>
+                              <div className="flex items-center gap-4">
+                                <Badge variant="outline">Draft</Badge>
+                                <Button variant="outline" size="sm" asChild>
+                                  <Link to={`/challenge/${challenge.id}/edit`}>Edit</Link>
+                                </Button>
+                              </div>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      ))
+                    ) : (
+                      <div className="text-center py-8">
+                        <p className="text-muted-foreground">No planned challenges yet.</p>
+                      </div>
+                    )}
+                  </TabsContent>
+                  <TabsContent value="completed" className="space-y-4">
+                    {completedChallenges.length > 0 ? (
+                      completedChallenges.map((challenge) => (
+                        <Card key={challenge.id} className="hover:bg-muted/30">
+                          <CardContent className="p-4">
+                            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                              <div>
+                                <Link to={`/challenge/${challenge.id}`} className="font-medium hover:text-primary">
+                                  {challenge.title}
+                                </Link>
+                                <div className="text-sm text-muted-foreground">
+                                  Completed: {formatDate(challenge.deadline)}
+                                </div>
+                              </div>
+                              <div className="flex items-center gap-4">
+                                <Badge variant="outline" className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100">
+                                  Completed
+                                </Badge>
+                                <Button variant="outline" size="sm" asChild>
+                                  <Link to={`/challenge/${challenge.id}/results`}>View Results</Link>
+                                </Button>
+                              </div>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      ))
+                    ) : (
+                      <div className="text-center py-8">
+                        <p className="text-muted-foreground">No completed challenges yet.</p>
+                      </div>
+                    )}
+                  </TabsContent>
+                </Tabs>
+              )}
             </CardContent>
           </Card>
           
@@ -203,38 +259,50 @@ export default function SponsorDashboard() {
               <CardTitle>Top Submissions</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="space-y-4">
-                {topSubmissions.map((submission, index) => (
-                  <Card key={submission.id} className="hover:bg-muted/30">
-                    <CardContent className="p-4">
-                      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-                        <div className="flex items-center gap-4">
-                          <div className="rounded-full w-8 h-8 bg-muted flex items-center justify-center font-medium">
-                            {index + 1}
-                          </div>
-                          <div>
-                            <Link to={`/submission/${submission.id}`} className="font-medium hover:text-primary">
-                              {submission.title}
-                            </Link>
-                            <div className="text-sm text-muted-foreground">
-                              by <Link to={`/profile/${submission.candidateId}`} className="hover:underline">{submission.candidateName}</Link>
+              {isLoadingSubmissions ? (
+                <div className="flex justify-center py-8">
+                  <p>Loading submissions...</p>
+                </div>
+              ) : submissions.length > 0 ? (
+                <div className="space-y-4">
+                  {submissions.slice(0, 3).map((submission, index) => (
+                    <Card key={submission.id} className="hover:bg-muted/30">
+                      <CardContent className="p-4">
+                        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                          <div className="flex items-center gap-4">
+                            <div className="rounded-full w-8 h-8 bg-muted flex items-center justify-center font-medium">
+                              {index + 1}
+                            </div>
+                            <div>
+                              <Link to={`/submission/${submission.id}`} className="font-medium hover:text-primary">
+                                {submission.title}
+                              </Link>
+                              <div className="text-sm text-muted-foreground">
+                                Submitted: {formatDate(submission.submission_date)}
+                              </div>
                             </div>
                           </div>
-                        </div>
-                        <div className="flex items-center gap-4">
-                          <div className="text-right">
-                            <div className="text-sm font-medium">Score</div>
-                            <div className="text-lg font-mono font-bold">{submission.score.toFixed(1)}</div>
+                          <div className="flex items-center gap-4">
+                            <div className="text-right">
+                              <div className="text-sm font-medium">Score</div>
+                              <div className="text-lg font-mono font-bold">
+                                {submission.score ? submission.score.toFixed(1) : "N/A"}
+                              </div>
+                            </div>
+                            <Button variant="outline" size="sm" asChild>
+                              <Link to={`/submission/${submission.id}`}>View</Link>
+                            </Button>
                           </div>
-                          <Button variant="outline" size="sm" asChild>
-                            <Link to={`/submission/${submission.id}`}>View</Link>
-                          </Button>
                         </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-8">
+                  <p className="text-muted-foreground">No submissions yet.</p>
+                </div>
+              )}
             </CardContent>
           </Card>
         </div>
@@ -245,17 +313,43 @@ export default function SponsorDashboard() {
               <CardTitle>Recent Activity</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              {recentEvents.map((event) => (
-                <div key={event.id} className="p-3 rounded-lg bg-muted/30">
-                  <div className="flex items-start gap-2">
-                    <Bell className="h-4 w-4 mt-0.5 flex-shrink-0 text-blue-500" />
-                    <div>
-                      <p className="font-medium">{event.message}</p>
-                      <div className="text-sm text-muted-foreground mt-1">{event.date}</div>
+              {challenges.length === 0 ? (
+                <div className="text-center py-4">
+                  <p className="text-muted-foreground">No recent activity.</p>
+                </div>
+              ) : (
+                <>
+                  <div className="p-3 rounded-lg bg-muted/30">
+                    <div className="flex items-start gap-2">
+                      <Bell className="h-4 w-4 mt-0.5 flex-shrink-0 text-blue-500" />
+                      <div>
+                        <p className="font-medium">
+                          {challenges.length > 0 
+                            ? `You have ${activeChallenges.length} active challenge${activeChallenges.length !== 1 ? 's' : ''}`
+                            : "Welcome to your sponsor dashboard"}
+                        </p>
+                        <div className="text-sm text-muted-foreground mt-1">Today</div>
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))}
+                  
+                  {activeChallenges.length > 0 && (
+                    <div className="p-3 rounded-lg bg-muted/30">
+                      <div className="flex items-start gap-2">
+                        <Calendar className="h-4 w-4 mt-0.5 flex-shrink-0 text-green-500" />
+                        <div>
+                          <p className="font-medium">
+                            {activeChallenges[0].title} deadline approaching
+                          </p>
+                          <div className="text-sm text-muted-foreground mt-1">
+                            {calculateDaysLeft(activeChallenges[0].deadline)}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </>
+              )}
             </CardContent>
           </Card>
 

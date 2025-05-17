@@ -9,7 +9,113 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      challenges: {
+        Row: {
+          category: string
+          created_at: string
+          deadline: string
+          description: string
+          difficulty: string
+          id: string
+          prize_amount: number | null
+          prize_description: string | null
+          requirements: string | null
+          sponsor_id: string
+          start_date: string
+          status: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          category: string
+          created_at?: string
+          deadline: string
+          description: string
+          difficulty?: string
+          id?: string
+          prize_amount?: number | null
+          prize_description?: string | null
+          requirements?: string | null
+          sponsor_id: string
+          start_date?: string
+          status?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          deadline?: string
+          description?: string
+          difficulty?: string
+          id?: string
+          prize_amount?: number | null
+          prize_description?: string | null
+          requirements?: string | null
+          sponsor_id?: string
+          start_date?: string
+          status?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      submissions: {
+        Row: {
+          challenge_id: string
+          created_at: string
+          demo_url: string | null
+          description: string
+          feedback: string | null
+          id: string
+          repository_url: string | null
+          score: number | null
+          status: string
+          submission_date: string
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          challenge_id: string
+          created_at?: string
+          demo_url?: string | null
+          description: string
+          feedback?: string | null
+          id?: string
+          repository_url?: string | null
+          score?: number | null
+          status?: string
+          submission_date?: string
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          challenge_id?: string
+          created_at?: string
+          demo_url?: string | null
+          description?: string
+          feedback?: string | null
+          id?: string
+          repository_url?: string | null
+          score?: number | null
+          status?: string
+          submission_date?: string
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "submissions_challenge_id_fkey"
+            columns: ["challenge_id"]
+            isOneToOne: false
+            referencedRelation: "challenges"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never

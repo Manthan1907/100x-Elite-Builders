@@ -19,6 +19,7 @@ import BuilderProfile from "./pages/BuilderProfile";
 import JudgePanel from "./pages/JudgePanel";
 import CandidateDashboard from "./pages/CandidateDashboard";
 import SponsorDashboard from "./pages/SponsorDashboard";
+import CreateChallenge from "./pages/CreateChallenge"; 
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -47,6 +48,7 @@ const App = () => (
               <Route path="/sponsor-onboarding" element={<SponsorOnboarding />} />
               <Route path="/candidate-dashboard" element={<CandidateDashboard />} />
               <Route path="/sponsor-dashboard" element={<SponsorDashboard />} />
+              <Route path="/create-challenge" element={<CreateChallenge />} />
               <Route path="/dashboard" element={<CandidateDashboard />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
